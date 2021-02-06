@@ -13,22 +13,23 @@ extern uint16_t ConvData;//ADC采样数据
 extern unsigned char BMP1[];
 int main()
 {
-	uint8_t x;
+	uint8_t x,y_bef=0,y_cur=0;
 	LED_Init();
 	USARTx_Init();
 	OLED_Init();					 /* OLED初始化 */
 	ADCx_Init();
 	Before_State_Update(accur*ConvData);
 	OLED_CLS();
-			draw_line(100,0,63);
+	OLED_ShowStr(1, 0, "1", 1);
 	while(1)
 	{
-//		for(x=0;x<128;x=(x+1)%128)
-//		{
-//			
-//			OLED_DrawWave(x,accur*ConvData);//这是个画波形的函数
-//			//之前写了个画点函数，显示的波形不连续，然后我就改了一下画点函数，波形在屏幕上就连续了
-//		}
+		for(x=0;x<128;x=(x+1)%128)
+		{
+			y_cur=accur*ConvData;
+			draw_line(x,y_bef,y_cur);
+			y_bef=y_cur;
+//			draw_line(1,56,8);
+		}
 
 	}
 }

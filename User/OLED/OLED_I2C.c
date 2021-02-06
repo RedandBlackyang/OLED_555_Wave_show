@@ -413,12 +413,14 @@ void draw_line(uint8_t x,uint8_t y_bef,uint8_t y_cur)
 	if(page_bef-page_cur>0)
 	{
 		OLED_SetPos( page_bef,x);
-		WriteDat((1<<point_bef)-0x01);
-		for(i=0;i<5;i++){
+		WriteDat(((1<<point_bef)-0x01)|(1<<point_bef));
+		while(page_bef!=page_cur+1){
 			page_bef--;
 			OLED_SetPos( page_bef,x);
 			WriteDat(0xff);
 		}
+		OLED_SetPos( page_cur,x);
+		WriteDat(((0x80-(1<<point_cur))|0x80)|(1<<point_cur));
 	}
 	else if(page_bef-page_cur==0)
 	{
@@ -433,15 +435,21 @@ void draw_line(uint8_t x,uint8_t y_bef,uint8_t y_cur)
 
 	else
 	{
-		OLED_SetPos(page_cur,x);
-		WriteDat((1<<point_cur)-0x01);
-		do{
-			page_cur --;
+		OLED_SetPos( page_cur,x);
+		WriteDat(((1<<point_cur)-0x01)|(1<<point_cur));
+		while(page_cur!=page_bef+1){
+			page_cur--;
 			OLED_SetPos( page_cur,x);
 			WriteDat(0xff);
-		}while(page_bef ==page_cur);
+		}
+		OLED_SetPos( page_bef,x);
+		WriteDat((0x80-(1<<point_bef))|0x80|(1<<point_bef));
 	}
-
+		for(i=0;i<8;i++)
+	{
+		OLED_SetPos(i, x+1) ;
+			WriteDat(0x00);
+	}
 }
 /*
 *********************************************************************************************************

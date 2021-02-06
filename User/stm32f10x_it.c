@@ -23,7 +23,10 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f10x_it.h"
+#include "bsp_adc.h"
+#include "bsp_key.h"
 
+extern uint8_t  key_status;
 /** @addtogroup STM32F10x_StdPeriph_Template
   * @{
   */
@@ -135,7 +138,34 @@ void PendSV_Handler(void)
 void SysTick_Handler(void)
 {
 }
+void KEY1_IRQHandler(void)
+{
+  //确保是否产生了EXTI Line中断
+	if(EXTI_GetITStatus(KEY1_INT_EXTI_LINE) != RESET) 
+	{
 
+		if(key_status==0)
+				key_status=1;
+		else 
+				key_status=0;
+    //清除中断标志位
+		EXTI_ClearITPendingBit(KEY1_INT_EXTI_LINE);     
+	}  
+}
+
+void KEY2_IRQHandler(void)
+{
+  //确保是否产生了EXTI Line中断
+	if(EXTI_GetITStatus(KEY2_INT_EXTI_LINE) != RESET) 
+	{
+		if(key_status==0)
+				key_status=1;
+		else 
+				key_status=0;
+    //清除中断标志位
+		EXTI_ClearITPendingBit(KEY2_INT_EXTI_LINE);     
+	}  
+}
 /******************************************************************************/
 /*                 STM32F10x Peripherals Interrupt Handlers                   */
 /*  Add here the Interrupt Handler for the used peripheral(s) (PPP), for the  */

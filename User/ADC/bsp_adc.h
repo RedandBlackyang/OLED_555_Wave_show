@@ -3,14 +3,18 @@
 
 #include "stm32f10x.h"
 /*GPIO*/
-#define ADCx_PORT_CLK  		RCC_APB2Periph_GPIOA
-#define ADCx_PIN  				GPIO_Pin_7
-#define ADCx_PORT					GPIOA
+#define ADCx_PORT_CLK_1  		RCC_APB2Periph_GPIOC
+#define ADCx_PIN_1  			GPIO_Pin_1
+#define ADCx_PORT_1					GPIOC
 
+#define ADCx_PORT_CLK_2  		RCC_APB2Periph_GPIOC
+#define ADCx_PIN_2  			GPIO_Pin_2
+#define ADCx_PORT_2					GPIOC
 /*ADC*/
 #define ADC_x							ADC1
 #define ADCx_CLK  		    RCC_APB2Periph_ADC1
-#define ADCx_CHx 		    	ADC_Channel_7
+#define ADCx_CHx_1 		    	ADC_Channel_11
+#define ADCx_CHx_2 		    	ADC_Channel_12
 
 /*DMA*/
 #define ADCx_DMA_CLK  		RCC_AHBPeriph_DMA1

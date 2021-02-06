@@ -338,7 +338,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F10X_MD,USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>..\User;..\Libraries\CMSIS;..\Libraries\STM32F10x_StdPeriph_Driver\inc;..\Libraries\STM32F10x_StdPeriph_Driver\src;..\User\LED;..\User\SysTick;..\User\USART;..\User\OLED;..\User\i2c;..\User\ADC;..\User\AdvancedTim</IncludePath>
+              <IncludePath>..\User;..\Libraries\CMSIS;..\Libraries\STM32F10x_StdPeriph_Driver\inc;..\Libraries\STM32F10x_StdPeriph_Driver\src;..\User\LED;..\User\SysTick;..\User\USART;..\User\OLED;..\User\i2c;..\User\ADC;..\User\AdvancedTim;..\User\Key</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -581,6 +581,11 @@
               <FileName>bsp_advanced_timer.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\User\AdvancedTim\bsp_advanced_timer.c</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_key.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\User\Key\bsp_key.c</FilePath>
             </File>
           </Files>
         </Group>

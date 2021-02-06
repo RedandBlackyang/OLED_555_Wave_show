@@ -26,3 +26,5 @@
 ..\output\stm32f10x_it.o: ..\Libraries\STM32F10x_StdPeriph_Driver\inc\stm32f10x_usart.h
 ..\output\stm32f10x_it.o: ..\Libraries\STM32F10x_StdPeriph_Driver\inc\stm32f10x_wwdg.h
 ..\output\stm32f10x_it.o: ..\Libraries\STM32F10x_StdPeriph_Driver\inc\misc.h
+..\output\stm32f10x_it.o: ..\User\ADC\bsp_adc.h
+..\output\stm32f10x_it.o: ..\User\Key\bsp_key.h

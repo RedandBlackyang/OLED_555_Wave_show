@@ -34,4 +34,4 @@
 ..\output\main.o: D:\Keil\ARM\ARMCC\Bin\..\include\inttypes.h
 ..\output\main.o: ..\User\ADC\bsp_adc.h
 ..\output\main.o: ..\User\AdvancedTim\bsp_advanced_timer.h
-..\output\main.o: D:\Keil\ARM\ARMCC\Bin\..\include\math.h
+..\output\main.o: ..\User\Key\bsp_key.h

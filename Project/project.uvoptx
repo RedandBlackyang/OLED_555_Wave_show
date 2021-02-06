@@ -153,120 +153,7 @@
           <Name>UL2CM3(-S0 -C0 -P0 -FD20000000 -FC1000 -FN1 -FF0STM32F10x_128 -FS08000000 -FL020000 -FP0($$Device:STM32F103C8$Flash\STM32F10x_128.FLM))</Name>
         </SetRegEntry>
       </TargetDriverDllRegistry>
-      <Breakpoint>
-        <Bp>
-          <Number>0</Number>
-          <Type>0</Type>
-          <LineNumber>413</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134221512</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>C:\Users\鏉ㄥ缓\Desktop\OLED娉㈠舰鏄剧ず\User\OLED\OLED_I2C.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\project\../User/OLED/OLED_I2C.c\413</Expression>
-        </Bp>
-        <Bp>
-          <Number>1</Number>
-          <Type>0</Type>
-          <LineNumber>415</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134221520</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>C:\Users\鏉ㄥ缓\Desktop\OLED娉㈠舰鏄剧ず\User\OLED\OLED_I2C.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\project\../User/OLED/OLED_I2C.c\415</Expression>
-        </Bp>
-        <Bp>
-          <Number>2</Number>
-          <Type>0</Type>
-          <LineNumber>416</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134221528</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>C:\Users\鏉ㄥ缓\Desktop\OLED娉㈠舰鏄剧ず\User\OLED\OLED_I2C.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\project\../User/OLED/OLED_I2C.c\416</Expression>
-        </Bp>
-        <Bp>
-          <Number>3</Number>
-          <Type>0</Type>
-          <LineNumber>417</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134221540</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>C:\Users\鏉ㄥ缓\Desktop\OLED娉㈠舰鏄剧ず\User\OLED\OLED_I2C.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\project\../User/OLED/OLED_I2C.c\417</Expression>
-        </Bp>
-        <Bp>
-          <Number>4</Number>
-          <Type>0</Type>
-          <LineNumber>418</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134221542</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>C:\Users\鏉ㄥ缓\Desktop\OLED娉㈠舰鏄剧ず\User\OLED\OLED_I2C.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\project\../User/OLED/OLED_I2C.c\418</Expression>
-        </Bp>
-        <Bp>
-          <Number>5</Number>
-          <Type>0</Type>
-          <LineNumber>421</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134221564</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>C:\Users\鏉ㄥ缓\Desktop\OLED娉㈠舰鏄剧ず\User\OLED\OLED_I2C.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\project\../User/OLED/OLED_I2C.c\421</Expression>
-        </Bp>
-        <Bp>
-          <Number>6</Number>
-          <Type>0</Type>
-          <LineNumber>426</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134221584</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>C:\Users\鏉ㄥ缓\Desktop\OLED娉㈠舰鏄剧ず\User\OLED\OLED_I2C.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\project\../User/OLED/OLED_I2C.c\426</Expression>
-        </Bp>
-      </Breakpoint>
+      <Breakpoint/>
       <Tracepoint>
         <THDelay>0</THDelay>
       </Tracepoint>
@@ -321,7 +208,7 @@
 
   <Group>
     <GroupName>STARTUP</GroupName>
-    <tvExp>0</tvExp>
+    <tvExp>1</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>
@@ -749,7 +636,7 @@
       <GroupNumber>4</GroupNumber>
       <FileNumber>34</FileNumber>
       <FileType>1</FileType>
-      <tvExp>1</tvExp>
+      <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
       <PathWithFileName>..\User\OLED\OLED_I2C.c</PathWithFileName>
@@ -793,6 +680,18 @@
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
+    <File>
+      <GroupNumber>4</GroupNumber>
+      <FileNumber>38</FileNumber>
+      <FileType>1</FileType>
+      <tvExp>1</tvExp>
+      <tvExpOptDlg>0</tvExpOptDlg>
+      <bDave2>0</bDave2>
+      <PathWithFileName>..\User\Key\bsp_key.c</PathWithFileName>
+      <FilenameWithoutPath>bsp_key.c</FilenameWithoutPath>
+      <RteFlg>0</RteFlg>
+      <bShared>0</bShared>
+    </File>
   </Group>
 
   <Group>
@@ -803,7 +702,7 @@
     <RteFlg>0</RteFlg>
     <File>
       <GroupNumber>5</GroupNumber>
-      <FileNumber>38</FileNumber>
+      <FileNumber>39</FileNumber>
       <FileType>5</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>

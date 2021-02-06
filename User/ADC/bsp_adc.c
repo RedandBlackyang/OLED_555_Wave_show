@@ -1,19 +1,24 @@
 #include "bsp_adc.h"
 
-uint16_t ConvData;
+uint16_t ConvData[256];
 
 static void ADCx_GPIO_Config(void)
 {
 	GPIO_InitTypeDef GPIO_InitStruct;
 	/*开时钟*/
-	RCC_APB2PeriphClockCmd(ADCx_PORT_CLK, ENABLE);
+	RCC_APB2PeriphClockCmd(ADCx_PORT_CLK_1, ENABLE);
+	RCC_APB2PeriphClockCmd(ADCx_PORT_CLK_2, ENABLE);
 	/*配置参数*/
-	GPIO_InitStruct.GPIO_Pin=ADCx_PIN;
+	GPIO_InitStruct.GPIO_Pin=ADCx_PIN_1;
 	GPIO_InitStruct.GPIO_Mode=GPIO_Mode_AIN;/*模拟输入模式*/
 	/*写入寄存器*/
-	GPIO_Init(ADCx_PORT, &GPIO_InitStruct);
+	GPIO_Init(ADCx_PORT_1, &GPIO_InitStruct);
+	
+	GPIO_InitStruct.GPIO_Pin=ADCx_PIN_2;
+	GPIO_Init(ADCx_PORT_2, &GPIO_InitStruct);
 
 }
+
 static void ADCx_Config(void)
 {
 	ADC_InitTypeDef ADC_InitStruct;
@@ -24,14 +29,15 @@ static void ADCx_Config(void)
 	ADC_InitStruct.ADC_ContinuousConvMode=ENABLE;/*连续转换*/
 	ADC_InitStruct.ADC_DataAlign=ADC_DataAlign_Right;/*数据右对齐*/
 	ADC_InitStruct.ADC_ExternalTrigConv=ADC_ExternalTrigConv_None;/*不使用外部硬件触发*/
-	ADC_InitStruct.ADC_NbrOfChannel=ADCx_CHx;/*ADC是哪个通道*/
-	ADC_InitStruct.ADC_ScanConvMode=DISABLE;/*不使用连续扫描*/
+	ADC_InitStruct.ADC_NbrOfChannel=2;/*ADC是哪个通道*/
+	ADC_InitStruct.ADC_ScanConvMode=ENABLE;/*不使用连续扫描*/
 	/*将参数写入寄存器*/
 	ADC_Init(ADC_x, &ADC_InitStruct);
 	/*设置ADC_CLK*/
 	RCC_ADCCLKConfig(RCC_PCLK2_Div6);
 	/*规则通道设置，通道，采样顺序，采样时间*/
-	ADC_RegularChannelConfig(ADC_x, ADCx_CHx, 1, ADC_SampleTime_41Cycles5);
+	ADC_RegularChannelConfig(ADC_x, ADCx_CHx_1, 1, ADC_SampleTime_239Cycles5);
+	ADC_RegularChannelConfig(ADC_x, ADCx_CHx_2, 2, ADC_SampleTime_239Cycles5);
 	/*ADC使能*/
 	ADC_Cmd(ADC_x, ENABLE);
 	/*校验ADC*/
@@ -49,11 +55,11 @@ static void ADCx_DMA_Config(void)
   RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
   /*配置DMA参数*/  
   DMA_InitStruct.DMA_PeripheralBaseAddr=(uint32_t)(&(ADC_x->DR));/*ADC的数据寄存器*/
-  DMA_InitStruct.DMA_MemoryBaseAddr=(uint32_t)(&ConvData);/*存储器地址*/
+  DMA_InitStruct.DMA_MemoryBaseAddr=(uint32_t)(ConvData);/*存储器地址*/
   DMA_InitStruct.DMA_DIR=DMA_DIR_PeripheralSRC;/*外设为源*/
-  DMA_InitStruct.DMA_BufferSize=1;/*数据的个数为1*/
+  DMA_InitStruct.DMA_BufferSize=256;/*数据的个数为128*/
   DMA_InitStruct.DMA_PeripheralInc=DMA_PeripheralInc_Disable;/*外设地址不增加*/
-  DMA_InitStruct.DMA_MemoryInc=DMA_MemoryInc_Disable;/*存储器地址不增加*/
+  DMA_InitStruct.DMA_MemoryInc=DMA_MemoryInc_Enable;/*存储器地址增加*/
   DMA_InitStruct.DMA_PeripheralDataSize=DMA_PeripheralDataSize_HalfWord; /*16位数据，所以是半字*/
   DMA_InitStruct.DMA_MemoryDataSize=DMA_MemoryDataSize_HalfWord;
   DMA_InitStruct.DMA_Mode=DMA_Mode_Circular;/*这里是指数据循环不停地发送*/

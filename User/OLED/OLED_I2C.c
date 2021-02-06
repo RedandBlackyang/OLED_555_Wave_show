@@ -405,7 +405,7 @@ void OLED_DrawWave(uint8_t x,uint8_t y)
 }
 void draw_line(uint8_t x,uint8_t y_bef,uint8_t y_cur)
 {
-	uint8_t page_bef,page_cur,point_bef,point_cur,i;
+	uint8_t page_bef,page_cur,point_bef,point_cur,i,j;
 	page_bef=7-y_bef/8;//7
 	page_cur=7-y_cur/8;//0
 	point_bef =7-y_bef%8;//7
@@ -445,10 +445,12 @@ void draw_line(uint8_t x,uint8_t y_bef,uint8_t y_cur)
 		OLED_SetPos( page_bef,x);
 		WriteDat((0x80-(1<<point_bef))|0x80|(1<<point_bef));
 	}
+	for(j=1;j<4;j++){
 		for(i=0;i<8;i++)
 	{
-		OLED_SetPos(i, x+1) ;
+		OLED_SetPos(i, x+j) ;
 			WriteDat(0x00);
+	}
 	}
 }
 /*

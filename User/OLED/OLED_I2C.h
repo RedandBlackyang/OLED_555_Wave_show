@@ -22,8 +22,5 @@ void OLED_ShowCN(unsigned char x, unsigned char y, unsigned char N);
 void OLED_DrawBMP(unsigned char x0,unsigned char y0,unsigned char x1,unsigned char y1,unsigned char BMP[]);
 uint8_t OLED_Test(void) ;//OLEDºÏ≤‚≤‚ ‘
 void Write_DataBuffer(void);
-void OLED_DrawWave(uint8_t x,uint8_t y);
-//void OLED_DrawPoint(uint8_t x,uint8_t y);
-void Before_State_Update(uint8_t y);
 void draw_line(uint8_t x,uint8_t y_bef,uint8_t y_cur);
 #endif

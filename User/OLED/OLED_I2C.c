@@ -309,100 +309,6 @@ void OLED_DrawBMP(unsigned char x0,unsigned char y0,unsigned char x1,unsigned ch
 	}
 }
 
-
-void Before_State_Update(uint8_t y)//根据y的值，求出前一个数据的有关参数
-{
-	Bef[0]=7-y/8;
-	Bef[1]=7-y%8;
-	Bef[2]=1<<Bef[1];
-}
-void Current_State_Update(uint8_t y)//根据Y值，求出当前数据的有关参数
-{
-	Cur[0]=7-y/8;//数据写在第几页
-	Cur[1]=7-y%8;//0x01要移动的位数
-	Cur[2]=1<<Cur[1];//要写什么数据
-}
-
-
-///*0<=x<=127,0<=y<=63屏幕看作一个坐标轴，左下角是原点*/
-//void OLED_DrawPoint(uint8_t x,uint8_t y)/*这里x是横坐标，y是纵坐标，在（x,y）处画一个点*/
-//{
-//	if(x>127||y>63)
-//		return;
-//	uint8_t page,move,data;
-//	
-//	page=7-y/8;//数据写在第几页
-//	move=7-y%8;//0x01要移动的位数
-//	data=0x01<<move;//要写什么数据
-//	
-//	OLED_SetPos(page,x);
-//	WriteDat(data);
-//}
-	
-void OLED_DrawWave(uint8_t x,uint8_t y)
-{
-	int8_t page_sub;
-	uint8_t page_buff,i,j;
-	Current_State_Update(y);//根据Y值，求出当前数据的有关参数
-	page_sub=Bef[0]-Cur[0];//当前值与前一个值的页数相比较
-	//确定当前列，每一页应该写什么数据
-	if(page_sub>0)
-	{
-		page_buff=Bef[0];
-		OLED_SetPos(page_buff,x);
-		WriteDat(Bef[2]-0x01);
-		page_buff--;
-		for(i=0;i<page_sub-1;i++)
-		{
-			OLED_SetPos(page_buff,x);
-			WriteDat(0xff);
-			page_buff--;
-		}
-		OLED_SetPos(page_buff,x);
-		WriteDat(0xff<<Cur[1]);
-	}
-	else if(page_sub==0)
-	{
-		if(Cur[1]==Bef[1])
-		{
-			OLED_SetPos(Cur[0],x);
-			WriteDat(Cur[2]);
-		}
-		else if(Cur[1]>Bef[1])
-		{
-			OLED_SetPos(Cur[0],x);
-			WriteDat((Cur[2]-Bef[2])|Cur[2]);
-		}
-		else if(Cur[1]<Bef[1])
-		{
-			OLED_SetPos(Cur[0],x);
-			WriteDat(Bef[2]-Cur[2]);
-		}
-	}
-	else if(page_sub<0)
-	{
-		page_buff=Cur[0];
-		OLED_SetPos(page_buff,x);
-		WriteDat((Cur[2]<<1)-0x01);
-		page_buff--;
-		for(i=0;i<0-page_sub-1;i++)
-		{
-			OLED_SetPos(page_buff,x);
-			WriteDat(0xff);
-			page_buff--;
-		}
-		OLED_SetPos(page_buff,x);
-		WriteDat(0xff<<(Bef[1]+1));
-	}
-	Before_State_Update(y);
-	//把下一列，每一页的数据清除掉
-	for(i=0;i<8;i++)
-	{
-		OLED_SetPos(i, x+1) ;
-//		for(j=0;j<1;j++)
-			WriteDat(0x00);
-	}
-}
 void draw_line(uint8_t x,uint8_t y_bef,uint8_t y_cur)
 {
 	uint8_t page_bef,page_cur,point_bef,point_cur,i,j;
@@ -445,13 +351,13 @@ void draw_line(uint8_t x,uint8_t y_bef,uint8_t y_cur)
 		OLED_SetPos( page_bef,x);
 		WriteDat((0x80-(1<<point_bef))|0x80|(1<<point_bef));
 	}
-	for(j=1;j<4;j++){
-		for(i=0;i<8;i++)
-	{
-		OLED_SetPos(i, x+j) ;
-			WriteDat(0x00);
-	}
-	}
+//	for(j=1;j<4;j++){
+//		for(i=0;i<8;i++)
+//		{
+//		OLED_SetPos(i, x+j) ;
+//			WriteDat(0x00);
+//		}
+//	}
 }
 /*
 *********************************************************************************************************

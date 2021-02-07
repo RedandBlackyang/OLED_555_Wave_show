@@ -150,7 +150,7 @@ void KEY1_IRQHandler(void)
 				key_status=0;
     //清除中断标志位
 		EXTI_ClearITPendingBit(KEY1_INT_EXTI_LINE);     
-	}  
+	} 
 }
 
 void KEY2_IRQHandler(void)
@@ -164,7 +164,8 @@ void KEY2_IRQHandler(void)
 				key_status=0;
     //清除中断标志位
 		EXTI_ClearITPendingBit(KEY2_INT_EXTI_LINE);     
-	}  
+	}
+
 }
 /******************************************************************************/
 /*                 STM32F10x Peripherals Interrupt Handlers                   */

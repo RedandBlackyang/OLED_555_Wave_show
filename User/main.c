@@ -6,7 +6,7 @@
 #include "bsp_adc.h"
 #include "bsp_advanced_timer.h"
 #include "bsp_key.h"
-
+#include <math.h>
 
 #define pi 3.1415926535
 #define accur 1/64	
@@ -16,7 +16,7 @@ extern unsigned char BMP1[];
 int main()
 {
 	uint16_t x;
-	uint16_t y1[128],y2[128];
+	uint8_t y1[128],y2[128];
 	LED_Init();
 	EXTI_Key_Config();
 	USARTx_Init();
@@ -27,30 +27,36 @@ int main()
 
 	while(1)
 	{
-//		OLED_CLS();
-//		Delay_ms(100);
+
 		for(x=0;x<256;x=x+2)
 		{
 			y1[x/2]=ConvData[x]*accur;
 		}
 		for(x=1;x<256;x=x+2)
 		{
-				y2[x/2]=ConvData[x]*accur;
-		}
-		if(key_status )
+			y2[x/2]=ConvData[x]*accur;
+
+		}	
+		if(key_status==1)
 		{
+			OLED_CLS();
 			for(x=1;x<128;x++)
 			{
 				draw_line(x,y1[x-1],y1[x]);
 			}
+			Delay_ms(1000);
 		}
 		else
 		{
+			OLED_CLS();
 			for(x=1;x<128;x++)
 			{
 				draw_line(x,y2[x-1],y2[x]);
 			}
+			Delay_ms(1000);
 		}
+		
+
 	}
 
 }

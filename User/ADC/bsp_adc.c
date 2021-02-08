@@ -1,7 +1,11 @@
 #include "bsp_adc.h"
+#include "OLED_I2C.h"
+#include "bsp_systick.h"
 
+#define accur 1/64
 uint16_t ConvData[256];
-
+extern uint8_t y1[128],y2[128];
+extern uint8_t key_status;
 static void ADCx_GPIO_Config(void)
 {
 	GPIO_InitTypeDef GPIO_InitStruct;
@@ -22,61 +26,124 @@ static void ADCx_GPIO_Config(void)
 static void ADCx_Config(void)
 {
 	ADC_InitTypeDef ADC_InitStruct;
-	/*打开ADC时钟*/
+
 	RCC_APB2PeriphClockCmd(ADCx_CLK, ENABLE);
-	/*配置参数*/
-	ADC_InitStruct.ADC_Mode=ADC_Mode_Independent;/*独立模式*/
-	ADC_InitStruct.ADC_ContinuousConvMode=ENABLE;/*连续转换*/
-	ADC_InitStruct.ADC_DataAlign=ADC_DataAlign_Right;/*数据右对齐*/
-	ADC_InitStruct.ADC_ExternalTrigConv=ADC_ExternalTrigConv_None;/*不使用外部硬件触发*/
-	ADC_InitStruct.ADC_NbrOfChannel=2;/*ADC是哪个通道*/
-	ADC_InitStruct.ADC_ScanConvMode=ENABLE;/*不使用连续扫描*/
-	/*将参数写入寄存器*/
+
+	ADC_InitStruct.ADC_Mode=ADC_Mode_Independent;				//使用外部触发应该关闭连续模式,因为只要有外部触发存在就可以触发新转换
+	ADC_InitStruct.ADC_ContinuousConvMode=DISABLE;			//使用外部触发时打开此功能,显示的个数就受ADC_SampleTime_239Cycles5影响,这很奇怪;
+	ADC_InitStruct.ADC_DataAlign=ADC_DataAlign_Right;
+	ADC_InitStruct.ADC_ExternalTrigConv=ADC_ExternalTrigConv_T1_CC1;
+	ADC_InitStruct.ADC_NbrOfChannel=2;
+	ADC_InitStruct.ADC_ScanConvMode=DISABLE;
+
 	ADC_Init(ADC_x, &ADC_InitStruct);
-	/*设置ADC_CLK*/
-	RCC_ADCCLKConfig(RCC_PCLK2_Div6);
-	/*规则通道设置，通道，采样顺序，采样时间*/
+
+	RCC_ADCCLKConfig(RCC_PCLK2_Div8);
+
 	ADC_RegularChannelConfig(ADC_x, ADCx_CHx_1, 1, ADC_SampleTime_239Cycles5);
-	ADC_RegularChannelConfig(ADC_x, ADCx_CHx_2, 2, ADC_SampleTime_239Cycles5);
-	/*ADC使能*/
+//	ADC_RegularChannelConfig(ADC_x, ADCx_CHx_2, 2, ADC_SampleTime_239Cycles5);
+
 	ADC_Cmd(ADC_x, ENABLE);
-	/*校验ADC*/
+
 	ADC_StartCalibration(ADC_x);
 	while(ADC_GetCalibrationStatus(ADC_x)==RESET);
-	/*DMA设置*/
+
 	ADC_DMACmd(ADC_x, ENABLE);
-	/*ADC软件触发，开始转换*/
-	ADC_SoftwareStartConvCmd(ADC_x, ENABLE);
+
+	ADC_ExternalTrigConvCmd(ADC_x, ENABLE);
+}
+static void DMA_NVIC_Config(void)
+{    
+		NVIC_InitTypeDef NVIC_InitStructure;
+
+    RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
+
+    NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
+
+    NVIC_InitStructure.NVIC_IRQChannel = DMA1_Channel1_IRQn;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+    NVIC_Init(&NVIC_InitStructure);
+		DMA_ITConfig(DMA1_Channel1, DMA_IT_TC, ENABLE);
 }
 static void ADCx_DMA_Config(void)
 {
 	DMA_InitTypeDef DMA_InitStruct;
-	/*打开DMA时钟*/
+	
+
   RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
-  /*配置DMA参数*/  
-  DMA_InitStruct.DMA_PeripheralBaseAddr=(uint32_t)(&(ADC_x->DR));/*ADC的数据寄存器*/
-  DMA_InitStruct.DMA_MemoryBaseAddr=(uint32_t)(ConvData);/*存储器地址*/
-  DMA_InitStruct.DMA_DIR=DMA_DIR_PeripheralSRC;/*外设为源*/
-  DMA_InitStruct.DMA_BufferSize=256;/*数据的个数为128*/
-  DMA_InitStruct.DMA_PeripheralInc=DMA_PeripheralInc_Disable;/*外设地址不增加*/
-  DMA_InitStruct.DMA_MemoryInc=DMA_MemoryInc_Enable;/*存储器地址增加*/
-  DMA_InitStruct.DMA_PeripheralDataSize=DMA_PeripheralDataSize_HalfWord; /*16位数据，所以是半字*/
+
+  DMA_InitStruct.DMA_PeripheralBaseAddr=(uint32_t)(&(ADC_x->DR));
+  DMA_InitStruct.DMA_MemoryBaseAddr=(uint32_t)(ConvData);
+  DMA_InitStruct.DMA_DIR=DMA_DIR_PeripheralSRC;
+  DMA_InitStruct.DMA_BufferSize=128;
+  DMA_InitStruct.DMA_PeripheralInc=DMA_PeripheralInc_Disable;
+  DMA_InitStruct.DMA_MemoryInc=DMA_MemoryInc_Enable;
+  DMA_InitStruct.DMA_PeripheralDataSize=DMA_PeripheralDataSize_HalfWord; 
   DMA_InitStruct.DMA_MemoryDataSize=DMA_MemoryDataSize_HalfWord;
-  DMA_InitStruct.DMA_Mode=DMA_Mode_Circular;/*这里是指数据循环不停地发送*/
-  DMA_InitStruct.DMA_Priority=DMA_Priority_High;/*DMA优先级设为高*/
-  DMA_InitStruct.DMA_M2M=DMA_M2M_Disable;/*不使能存储器到存储器*/
-	/*将参数写入寄存器*/
+  DMA_InitStruct.DMA_Mode=DMA_Mode_Circular;
+  DMA_InitStruct.DMA_Priority=DMA_Priority_High;
+  DMA_InitStruct.DMA_M2M=DMA_M2M_Disable;
+
   DMA_Init(ADCx_DMA_CHx, &DMA_InitStruct);
-	/*使能DMA*/
+
   DMA_Cmd(ADCx_DMA_CHx, ENABLE);
 }
 void ADCx_Init(void)
 {
 	
 	ADCx_GPIO_Config();
+	DMA_NVIC_Config();
 	ADCx_DMA_Config();
 	ADCx_Config();
 	
 }
+void DMA1_Channel1_IRQHandler(void)
+{
+	u16 x=0;
+	
+  DMA_Cmd(DMA1_Channel1, DISABLE);
 
+  DMA_ClearITPendingBit(DMA1_IT_TC1);
+	for(x=0;x<128;x++)
+	{
+			y1[x]=ConvData[x]*accur;
+	}
+	OLED_CLS();
+	for(x=1;x<128;x++)
+	{
+		draw_line(x,y1[x-1],y1[x]);
+	}
+	Delay_ms(1000);
+	
+//		for(x=0;x<256;x=x+2)
+//		{
+//			y1[x/2]=ConvData[x]*accur;
+//		}
+//		for(x=1;x<256;x=x+2)
+//		{
+//			y2[x/2]=ConvData[x]*accur;
+
+//		}	
+//		if(key_status==1)
+//		{
+//			OLED_CLS();
+//			for(x=1;x<128;x++)
+//			{
+//				draw_line(x,y1[x-1],y1[x]);
+//			}
+//			Delay_ms(1000);
+//		}
+//		else
+//		{
+//			OLED_CLS();
+//			for(x=1;x<128;x++)
+//			{
+//				draw_line(x,y2[x-1],y2[x]);
+//			}
+//			Delay_ms(1000);
+//		}
+	DMA_Cmd(DMA1_Channel1, ENABLE);
+}
 

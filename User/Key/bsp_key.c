@@ -15,7 +15,7 @@ static void NVIC_Configuration(void)
   /* 配置中断源：按键1 */
   NVIC_InitStructure.NVIC_IRQChannel = KEY1_INT_EXTI_IRQ;
   /* 配置抢占优先级 */
-  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
+  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
   /* 配置子优先级 */
   NVIC_InitStructure.NVIC_IRQChannelSubPriority = 2;
   /* 使能中断通道 */

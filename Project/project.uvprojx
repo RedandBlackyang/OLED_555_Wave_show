@@ -535,6 +535,31 @@
           </Files>
         </Group>
         <Group>
+          <GroupName>DSP_LIBRARIES</GroupName>
+          <Files>
+            <File>
+              <FileName>cr4_fft_256_stm32.s</FileName>
+              <FileType>2</FileType>
+              <FilePath>..\DSP_Libraries\cr4_fft_256_stm32.s</FilePath>
+            </File>
+            <File>
+              <FileName>cr4_fft_1024_stm32.s</FileName>
+              <FileType>2</FileType>
+              <FilePath>..\DSP_Libraries\cr4_fft_1024_stm32.s</FilePath>
+            </File>
+            <File>
+              <FileName>stm32_dsp.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\DSP_Libraries\stm32_dsp.h</FilePath>
+            </File>
+            <File>
+              <FileName>table_fft.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\DSP_Libraries\table_fft.h</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
           <GroupName>USER</GroupName>
           <Files>
             <File>

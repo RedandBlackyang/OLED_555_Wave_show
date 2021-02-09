@@ -8,23 +8,24 @@
 #include "bsp_key.h"
 #include <math.h>
 #include "bsp_advanced_timer.h"
-
+#include "table_fft.h"
+#include	"stm32_dsp.h"
+#include "fft_calculate.h"
 #define pi 3.1415926535
 #define accur 1/64	
 uint8_t key_status=1 ;
 uint8_t y1[128],y2[128];
-extern uint16_t ConvData[256];//ADC采样数据
+extern uint16_t ConvData[NPT];//ADC采样数据
 extern unsigned char BMP1[];
 int main()
 {
 	uint16_t x;
 	
 	LED_Init();
+	OLED_Init();					 /* OLED初始化 */
 	EXTI_Key_Config();
 	USARTx_Init();
 	AdvancedTim_Init();
-	
-	OLED_Init();					 /* OLED初始化 */
 	ADCx_Init();
 	OLED_CLS();
 	Delay_ms(100);

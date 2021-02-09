@@ -1,9 +1,11 @@
 #include "bsp_adc.h"
 #include "OLED_I2C.h"
 #include "bsp_systick.h"
-
+#include "fft_calculate.h"
+#include "bsp_advanced_timer.h"
+#include <string.h>
 #define accur 1/64
-uint16_t ConvData[256];
+uint16_t ConvData[NPT];
 extern uint8_t y1[128],y2[128];
 extern uint8_t key_status;
 static void ADCx_GPIO_Config(void)
@@ -33,7 +35,7 @@ static void ADCx_Config(void)
 	ADC_InitStruct.ADC_ContinuousConvMode=DISABLE;			//使用外部触发时打开此功能,显示的个数就受ADC_SampleTime_239Cycles5影响,这很奇怪;
 	ADC_InitStruct.ADC_DataAlign=ADC_DataAlign_Right;
 	ADC_InitStruct.ADC_ExternalTrigConv=ADC_ExternalTrigConv_T1_CC1;
-	ADC_InitStruct.ADC_NbrOfChannel=2;
+	ADC_InitStruct.ADC_NbrOfChannel=1;
 	ADC_InitStruct.ADC_ScanConvMode=DISABLE;
 
 	ADC_Init(ADC_x, &ADC_InitStruct);
@@ -77,7 +79,7 @@ static void ADCx_DMA_Config(void)
   DMA_InitStruct.DMA_PeripheralBaseAddr=(uint32_t)(&(ADC_x->DR));
   DMA_InitStruct.DMA_MemoryBaseAddr=(uint32_t)(ConvData);
   DMA_InitStruct.DMA_DIR=DMA_DIR_PeripheralSRC;
-  DMA_InitStruct.DMA_BufferSize=128;
+  DMA_InitStruct.DMA_BufferSize=NPT;
   DMA_InitStruct.DMA_PeripheralInc=DMA_PeripheralInc_Disable;
   DMA_InitStruct.DMA_MemoryInc=DMA_MemoryInc_Enable;
   DMA_InitStruct.DMA_PeripheralDataSize=DMA_PeripheralDataSize_HalfWord; 
@@ -101,49 +103,28 @@ void ADCx_Init(void)
 }
 void DMA1_Channel1_IRQHandler(void)
 {
-	u16 x=0;
-	
+	u16 x=0,i=0;
+	char str_Freq[10]={0};
   DMA_Cmd(DMA1_Channel1, DISABLE);
 
   DMA_ClearITPendingBit(DMA1_IT_TC1);
-	for(x=0;x<128;x++)
-	{
-			y1[x]=ConvData[x]*accur;
-	}
+	
+	FFT_Parameter_Return(ConvData);		//FFT计算实际频率
 	OLED_CLS();
-	for(x=1;x<128;x++)
+	
+	sprintf(str_Freq,"%.1f Hz",Freq);
+	OLED_ShowStr(0,0,(unsigned char *)str_Freq,1);
+	
+	for(x=0;x<128;x++)								
+	{
+		y1[x]=ConvData[x]*accur;
+	}
+	for(x=1;x<128;x++)							//画波形
 	{
 		draw_line(x,y1[x-1],y1[x]);
 	}
-	Delay_ms(1000);
 	
-//		for(x=0;x<256;x=x+2)
-//		{
-//			y1[x/2]=ConvData[x]*accur;
-//		}
-//		for(x=1;x<256;x=x+2)
-//		{
-//			y2[x/2]=ConvData[x]*accur;
-
-//		}	
-//		if(key_status==1)
-//		{
-//			OLED_CLS();
-//			for(x=1;x<128;x++)
-//			{
-//				draw_line(x,y1[x-1],y1[x]);
-//			}
-//			Delay_ms(1000);
-//		}
-//		else
-//		{
-//			OLED_CLS();
-//			for(x=1;x<128;x++)
-//			{
-//				draw_line(x,y2[x-1],y2[x]);
-//			}
-//			Delay_ms(1000);
-//		}
+	Delay_ms(150);
 	DMA_Cmd(DMA1_Channel1, ENABLE);
 }
 

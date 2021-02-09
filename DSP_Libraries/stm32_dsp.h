@@ -50,6 +50,11 @@ u16 DoFullPID(u16 In, u16 Ref, u16 *Coeff);
 /* PID controller in assembly, error computed outside the function */
 u16 PID_stm32(u16 Error, u16 *Coeff);
 
+
+
+//pssIN:高16位存储虚部，低16位存储实部。
+
+
 /* Radix-4 complex FFT for STM32, in assembly  */
 /* 64 points*/
 void cr4_fft_64_stm32(void *pssOUT, void *pssIN, u16 Nbin);

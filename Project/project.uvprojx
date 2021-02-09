@@ -338,7 +338,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F10X_HD,USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>..\User;..\Libraries\CMSIS;..\User\LED;..\User\SysTick;..\User\USART;..\User\OLED;..\User\i2c;..\User\ADC;..\User\AdvancedTim;..\User\Key;..\Libraries\FWlib\inc</IncludePath>
+              <IncludePath>..\User;..\Libraries\CMSIS;..\User\LED;..\User\SysTick;..\User\USART;..\User\OLED;..\User\i2c;..\User\ADC;..\User\AdvancedTim;..\User\Key;..\Libraries\FWlib\inc;..\DSP_Libraries</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -556,6 +556,11 @@
               <FileName>table_fft.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\DSP_Libraries\table_fft.h</FilePath>
+            </File>
+            <File>
+              <FileName>fft_calculate.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\DSP_Libraries\fft_calculate.c</FilePath>
             </File>
           </Files>
         </Group>

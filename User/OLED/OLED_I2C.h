@@ -40,5 +40,6 @@ void OLED_OFF(void);
 void OLED_ShowStr(unsigned char x, unsigned char y, unsigned char ch[], unsigned char TextSize);
 void OLED_ShowCN(unsigned char x, unsigned char y, unsigned char N);
 void OLED_DrawBMP(unsigned char x0,unsigned char y0,unsigned char x1,unsigned char y1,unsigned char BMP[]);
-void draw_line(uint8_t x,uint8_t y_bef,uint8_t y_cur);
+// 画竖直的线,在横坐标为x处,画由y_bef到y_cur的直线
+void draw_vertical_line(uint8_t x,uint8_t y_bef,uint8_t y_cur);
 #endif

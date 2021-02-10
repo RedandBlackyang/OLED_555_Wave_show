@@ -3,7 +3,7 @@
 #include "bsp_systick.h"
 #include "fft_calculate.h"
 #include "bsp_advanced_timer.h"
-#include <string.h>
+#include <stdio.h>
 #define accur 1/64
 uint16_t ADC_Data[NPT];
 extern uint8_t y1[128],y2[128];
@@ -121,7 +121,7 @@ void DMA1_Channel1_IRQHandler(void)
 	}
 	for(x=1;x<128;x++)							//»­²¨ÐÎ
 	{
-		draw_line(x,y1[x-1],y1[x]);
+		draw_vertical_line(x,y1[x-1],y1[x]);
 	}
 	
 	Delay_ms(150);

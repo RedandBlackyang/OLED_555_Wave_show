@@ -341,7 +341,8 @@ void OLED_DrawBMP(unsigned char x0,unsigned char y0,unsigned char x1,unsigned ch
 		}
 	}
 }
-void draw_line(uint8_t x,uint8_t y_bef,uint8_t y_cur)
+// 画竖直的线,在横坐标为x处,画由y_bef到y_cur的直线
+void draw_vertical_line(uint8_t x,uint8_t y_bef,uint8_t y_cur)
 {
 	uint8_t page_bef,page_cur,point_bef,point_cur;
 	page_bef=7-y_bef/8;//7

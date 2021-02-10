@@ -2,7 +2,6 @@
 #include "bsp_usart.h"
 #include "bsp_systick.h"
 #include "OLED_I2C.h"
-#include "bsp_i2c_gpio.h"
 #include "bsp_adc.h"
 #include "bsp_advanced_timer.h"
 #include "bsp_key.h"
@@ -20,7 +19,7 @@ extern unsigned char BMP1[];
 int main()
 {
 	uint16_t x;
-	
+	I2C_Configuration();
 	LED_Init();
 	OLED_Init();					 /* OLED≥ı ºªØ */
 	EXTI_Key_Config();
@@ -28,39 +27,9 @@ int main()
 	AdvancedTim_Init();
 	ADCx_Init();
 	OLED_CLS();
-	Delay_ms(100);
 	TIM_Cmd(ADVANCED_TIM, ENABLE);
 	while(1)
 	{
-
-//		for(x=0;x<256;x=x+2)
-//		{
-//			y1[x/2]=ConvData[x]*accur;
-//		}
-//		for(x=1;x<256;x=x+2)
-//		{
-//			y2[x/2]=ConvData[x]*accur;
-
-//		}	
-//		if(key_status==1)
-//		{
-//			OLED_CLS();
-//			for(x=1;x<128;x++)
-//			{
-//				draw_line(x,y1[x-1],y1[x]);
-//			}
-//			Delay_ms(1000);
-//		}
-//		else
-//		{
-//			OLED_CLS();
-//			for(x=1;x<128;x++)
-//			{
-//				draw_line(x,y2[x-1],y2[x]);
-//			}
-//			Delay_ms(1000);
-//		}
-		
 
 	}
 

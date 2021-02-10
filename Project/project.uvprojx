@@ -598,11 +598,6 @@
               <FilePath>..\User\OLED\OLED_I2C.c</FilePath>
             </File>
             <File>
-              <FileName>bsp_i2c_gpio.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\User\i2c\bsp_i2c_gpio.c</FilePath>
-            </File>
-            <File>
               <FileName>bsp_adc.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\User\ADC\bsp_adc.c</FilePath>

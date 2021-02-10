@@ -1,32 +1,82 @@
-#include "OLED_I2C.h"
-#include "bsp_i2c_gpio.h"
-#include "./systick/bsp_SysTick.h"
-#include "codetab.h"
-
-uint8_t DataBuffer[8][128];
-uint8_t Bef[3];//保存前一个数据的几个参数1.要写在第几页2.0x01要移动几位3.写什么数据
-uint8_t Cur[3];//当前前一个数据1.要写在第几页2.0x01要移动几位3.写什么数据
-
-/*
-*********************************************************************************************************
-*	函 数 名: i2c_CheckDevice
-*	功能说明: 检测I2C总线设备，CPU向发送设备地址，然后读取设备应答来判断该设备是否存在
-*	形    参：_Address：设备的I2C总线地址
-*	返 回 值: 返回值 0 表示正确， 返回1表示未探测到
-*********************************************************************************************************
-*/
-uint8_t OLED_CheckDevice(uint8_t _Address)
-{
-	uint8_t ucAck;
+/**
+  ******************************************************************************
+  * @file    OLED_I2C.c
+  * @author  fire
+  * @version V1.0
+  * @date    2014-xx-xx
+  * @brief   128*64点阵的OLED显示屏驱动文件，仅适用于SD1306驱动IIC通信方式显示屏
+  ******************************************************************************
+  * @attention
+  *
+  * 实验平台:野火 F103-指南者 STM32 开发板 
+  * 论坛    :http://www.firebbs.cn
+  * 淘宝    :https://fire-stm32.taobao.com
 	
-	i2c_Start();		/* 发送启动信号 */
+	* Function List:
+	*	1. void I2C_Configuration(void) -- 配置CPU的硬件I2C
+	* 2. void I2C_WriteByte(uint8_t addr,uint8_t data) -- 向寄存器地址写一个byte的数据
+	* 3. void WriteCmd(unsigned char I2C_Command) -- 写命令
+	* 4. void WriteDat(unsigned char I2C_Data) -- 写数据
+	* 5. void OLED_Init(void) -- OLED屏初始化
+	* 6. void OLED_SetPos(unsigned char x, unsigned char y) -- 设置起始点坐标
+	* 7. void OLED_Fill(unsigned char fill_Data) -- 全屏填充
+	* 8. void OLED_CLS(void) -- 清屏
+	* 9. void OLED_ON(void) -- 唤醒
+	* 10. void OLED_OFF(void) -- 睡眠
+	* 11. void OLED_ShowStr(unsigned char x, unsigned char y, unsigned char ch[], unsigned char TextSize) -- 显示字符串(字体大小有6*8和8*16两种)
+	* 12. void OLED_ShowCN(unsigned char x, unsigned char y, unsigned char N) -- 显示中文(中文需要先取模，然后放到codetab.h中)
+	* 13. void OLED_DrawBMP(unsigned char x0,unsigned char y0,unsigned char x1,unsigned char y1,unsigned char BMP[]) -- BMP图片
+	*
+  *
+  ******************************************************************************
+  */ 
 
-	i2c_SendByte(_Address|OLED_I2C_WR);/* 发送设备地址 */
-	ucAck = i2c_WaitAck();	/* 检测设备的ACK应答 */
 
-	i2c_Stop();			/* 发送停止信号 */
 
-	return ucAck;
+
+#include "OLED_I2C.h"
+#include "codetab.h"
+#include "./systick/bsp_SysTick.h"
+
+
+
+ /**
+  * @brief  I2C_Configuration，初始化硬件IIC引脚
+  * @param  无
+  * @retval 无
+  */
+void I2C_Configuration(void)
+{
+	I2C_InitTypeDef  I2C_InitStructure;
+	GPIO_InitTypeDef  GPIO_InitStructure; 
+
+	/*I2C1外设时钟使能 */
+	OLED_I2C_CLK_INIT(OLED_I2C_CLK,ENABLE);
+	
+	/*I2C1外设GPIO时钟使能 */
+	RCC_APB2PeriphClockCmd(OLED_I2C_SCL_GPIO_CLK | OLED_I2C_SDA_GPIO_CLK,ENABLE);
+
+	 /* I2C_SCL、I2C_SDA*/
+  GPIO_InitStructure.GPIO_Pin = OLED_I2C_SCL_PIN;
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_OD;	       // 开漏输出
+  GPIO_Init(OLED_I2C_SCL_GPIO_PORT, &GPIO_InitStructure);
+	
+  GPIO_InitStructure.GPIO_Pin = OLED_I2C_SDA_PIN;
+  GPIO_Init(OLED_I2C_SDA_GPIO_PORT, &GPIO_InitStructure);	
+	
+	
+	/* I2C 配置 */
+  I2C_InitStructure.I2C_Mode = I2C_Mode_I2C;	
+  I2C_InitStructure.I2C_DutyCycle = I2C_DutyCycle_2;	/* 高电平数据稳定，低电平数据变化 SCL 时钟线的占空比 */
+  I2C_InitStructure.I2C_OwnAddress1 =OLED_ADDRESS;    //主机的I2C地址
+  I2C_InitStructure.I2C_Ack = I2C_Ack_Enable ;	
+  I2C_InitStructure.I2C_AcknowledgedAddress = I2C_AcknowledgedAddress_7bit;	/* I2C的寻址模式 */
+  I2C_InitStructure.I2C_ClockSpeed = I2C_Speed;	                            /* 通信速率 */
+  
+  I2C_Init(OLED_I2C, &I2C_InitStructure);	                                      /* I2C1 初始化 */
+	I2C_Cmd(OLED_I2C, ENABLE);  	                                                /* 使能 I2C1 */
+	
 }
 
 
@@ -36,42 +86,23 @@ uint8_t OLED_CheckDevice(uint8_t _Address)
 	*					data：要写入的数据
   * @retval 无
   */
-void I2C_WriteByte(uint8_t addr,uint8_t data){
+void I2C_WriteByte(uint8_t addr,uint8_t data)
+{
+  while(I2C_GetFlagStatus(I2C1, I2C_FLAG_BUSY));
 	
-	i2c_Start();//开启I2C总线
-	
-	/* 发送设备地址+读写控制bit（0 = w， 1 = r) bit7 先传 */
-	i2c_SendByte(OLED_ADDRESS|OLED_I2C_WR);
-	
-	/*等待ACK */
-	if (i2c_WaitAck() != 0)
-	{
-		goto cmd_fail;	/* OLED器件无应答 */
-	}
-		
-	i2c_SendByte(addr);//发送寄存器地址
-	
-	/*等待ACK */
-	if (i2c_WaitAck() != 0)
-	{
-		goto cmd_fail;	/* OLED器件无应答 */
-	}
+	I2C_GenerateSTART(I2C1, ENABLE);//开启I2C1
+	while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_MODE_SELECT));/*EV5,主模式*/
 
-	i2c_SendByte(data);//发送数据
-	
-	/*等待ACK */
-	if (i2c_WaitAck() != 0)
-	{
-		goto cmd_fail;	/* OLED器件无应答 */
-	}	
-	
- /* 发送I2C总线停止信号 */
-	i2c_Stop();
+	I2C_Send7bitAddress(I2C1, OLED_ADDRESS, I2C_Direction_Transmitter);//器件地址 -- 默认0x78
+	while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED));
 
-cmd_fail: /* 命令执行失败后，切记发送停止信号，避免影响I2C总线上其他设备 */
-	/* 发送I2C总线停止信号 */
-	i2c_Stop();
+	I2C_SendData(I2C1, addr);//寄存器地址
+	while (!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTED));
 
+	I2C_SendData(I2C1, data);//发送数据
+	while (!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTED));
+	
+	I2C_GenerateSTOP(I2C1, ENABLE);//关闭I2C1总线
 }
 
 
@@ -104,7 +135,6 @@ void WriteDat(unsigned char I2C_Data)//写数据
   */
 void OLED_Init(void)
 {
-	i2c_CfgGpio();				 /*I2C总线的GPIO初始化*/
 	Delay_ms(1000);		// 1s,这里的延时很重要,上电后延时，没有错误的冗余设计
 	
 	WriteCmd(0xAE); //display off
@@ -140,15 +170,16 @@ void OLED_Init(void)
 
  /**
   * @brief  OLED_SetPos，设置光标
-  * @param  x,第几页
-	*					y,第几列
+  * @param  x,光标x位置
+	*					y，光标y位置
   * @retval 无
   */
 void OLED_SetPos(unsigned char x, unsigned char y) //设置起始点坐标
 { 
-	WriteCmd(0xb0+x);
-	WriteCmd((y&0x0f)|0x00);//LOW
-	WriteCmd(((y&0xf0)>>4)|0x10);//HIGHT
+	WriteCmd(0xb0+y);
+	WriteCmd((x&0x0f)|0x00);				//这里是0x00切记不是0x01
+	WriteCmd(((x&0xf0)>>4)|0x10);
+	
 }
 
  /**
@@ -156,17 +187,19 @@ void OLED_SetPos(unsigned char x, unsigned char y) //设置起始点坐标
   * @param  fill_Data:要填充的数据
 	* @retval 无
   */
-void OLED_Fill(void)//全屏填充
+void OLED_Fill(unsigned char fill_Data)//全屏填充
 {
-	uint8_t i,j;
-	for(i=0;i<8;i++)
+	unsigned char m,n;
+	for(m=0;m<8;m++)
 	{
-		for(j=0;j<128;j++)
-		{
-			DataBuffer[i][j]=0xff;
-		}
+		WriteCmd(0xb0+m);		//page0-page1
+		WriteCmd(0x00);		//low column start address
+		WriteCmd(0x10);		//high column start address
+		for(n=0;n<128;n++)
+			{
+				WriteDat(fill_Data);
+			}
 	}
-	Write_DataBuffer();
 }
 
  /**
@@ -176,15 +209,7 @@ void OLED_Fill(void)//全屏填充
   */
 void OLED_CLS(void)//清屏
 {
-	uint8_t i,j;
-	for(i=0;i<8;i++)
-	{
-		for(j=0;j<128;j++)
-		{
-			DataBuffer[i][j]=0x00;
-		}
-	}
-	Write_DataBuffer();
+	OLED_Fill(0x00);
 }
 
 
@@ -214,10 +239,15 @@ void OLED_OFF(void)
 }
 
 
+ /**
+  * @brief  OLED_ShowStr，显示codetab.h中的ASCII字符,有6*8和8*16可选择
+  * @param  x,y : 起始点坐标(x:0~127, y:0~7);
+	*					ch[] :- 要显示的字符串; 
+	*					TextSize : 字符大小(1:6*8 ; 2:8*16)
+	* @retval 无
+  */
 void OLED_ShowStr(unsigned char x, unsigned char y, unsigned char ch[], unsigned char TextSize)
 {
-	// Parameters     : x,y -- 起始点坐标(x:0~127, y:0~7); ch[] -- 要显示的字符串; TextSize -- 字符大小(1:6*8 ; 2:8*16)
-	// Description    : 显示codetab.h中的ASCII字符,有6*8和8*16可选择
 	unsigned char c = 0,i = 0,j = 0;
 	switch(TextSize)
 	{
@@ -231,8 +261,7 @@ void OLED_ShowStr(unsigned char x, unsigned char y, unsigned char ch[], unsigned
 					x = 0;
 					y++;
 				}
-				//OLED_SetPos(x,y);
-				OLED_SetPos(y,x);
+				OLED_SetPos(x,y);
 				for(i=0;i<6;i++)
 					WriteDat(F6x8[c][i]);
 				x += 6;
@@ -249,12 +278,10 @@ void OLED_ShowStr(unsigned char x, unsigned char y, unsigned char ch[], unsigned
 					x = 0;
 					y++;
 				}
-				//OLED_SetPos(x,y);
-				OLED_SetPos(y,x);
+				OLED_SetPos(x,y);
 				for(i=0;i<8;i++)
 					WriteDat(F8X16[c*16+i]);
-				//OLED_SetPos(x,y+1);
-				OLED_SetPos(y+1,x);
+				OLED_SetPos(x,y+1);
 				for(i=0;i<8;i++)
 					WriteDat(F8X16[c*16+i+8]);
 				x += 8;
@@ -264,22 +291,23 @@ void OLED_ShowStr(unsigned char x, unsigned char y, unsigned char ch[], unsigned
 	}
 }
 
-
+ /**
+  * @brief  OLED_ShowCN，显示codetab.h中的汉字,16*16点阵
+  * @param  x,y: 起始点坐标(x:0~127, y:0~7); 
+	*					N:汉字在codetab.h中的索引
+	* @retval 无
+  */
 void OLED_ShowCN(unsigned char x, unsigned char y, unsigned char N)
 {
-	// Parameters     : x,y -- 起始点坐标(x:0~127, y:0~7); N:汉字在codetab.h中的索引
-	// Description    : 显示codetab.h中的汉字,16*16点阵
 	unsigned char wm=0;
 	unsigned int  adder=32*N;
-	//OLED_SetPos(x , y);
-	OLED_SetPos(y,x);
+	OLED_SetPos(x , y);
 	for(wm = 0;wm < 16;wm++)
 	{
 		WriteDat(F16x16[adder]);
 		adder += 1;
 	}
-	//OLED_SetPos(x,y + 1);
-	OLED_SetPos(y+1,x);
+	OLED_SetPos(x,y + 1);
 	for(wm = 0;wm < 16;wm++)
 	{
 		WriteDat(F16x16[adder]);
@@ -287,10 +315,16 @@ void OLED_ShowCN(unsigned char x, unsigned char y, unsigned char N)
 	}
 }
 
+
+
+ /**
+  * @brief  OLED_DrawBMP，显示BMP位图
+  * @param  x0,y0 :起始点坐标(x0:0~127, y0:0~7);
+	*					x1,y1 : 起点对角线(结束点)的坐标(x1:1~128,y1:1~8)
+	* @retval 无
+  */
 void OLED_DrawBMP(unsigned char x0,unsigned char y0,unsigned char x1,unsigned char y1,unsigned char BMP[])
 {
-	// Parameters     : x0,y0 -- 起始点坐标(x0:0~127, y0:0~7); x1,y1 -- 起点对角线(结束点)的坐标(x1:1~128,y1:1~8)
-	// Description    : 显示BMP位图
 	unsigned int j=0;
 	unsigned char x,y;
 
@@ -300,15 +334,13 @@ void OLED_DrawBMP(unsigned char x0,unsigned char y0,unsigned char x1,unsigned ch
 		y = y1/8 + 1;
 	for(y=y0;y<y1;y++)
 	{
-		//OLED_SetPos(x0,y);
-		OLED_SetPos(y,x0);
+		OLED_SetPos(x0,y);
     for(x=x0;x<x1;x++)
 		{
 			WriteDat(BMP[j++]);
 		}
 	}
 }
-
 void draw_line(uint8_t x,uint8_t y_bef,uint8_t y_cur)
 {
 	uint8_t page_bef,page_cur,point_bef,point_cur,i,j;
@@ -318,19 +350,19 @@ void draw_line(uint8_t x,uint8_t y_bef,uint8_t y_cur)
 	point_cur	= 7-y_cur%8;//0
 	if(page_bef-page_cur>0)
 	{
-		OLED_SetPos( page_bef,x);
+		OLED_SetPos( x,page_bef);
 		WriteDat(((1<<point_bef)-0x01)|(1<<point_bef));
 		while(page_bef!=page_cur+1){
 			page_bef--;
-			OLED_SetPos( page_bef,x);
+			OLED_SetPos( x,page_bef);
 			WriteDat(0xff);
 		}
-		OLED_SetPos( page_cur,x);
+		OLED_SetPos( x,page_cur);
 		WriteDat(((0x80-(1<<point_cur))|0x80)|(1<<point_cur));
 	}
 	else if(page_bef-page_cur==0)
 	{
-		OLED_SetPos( page_bef,x);
+		OLED_SetPos( x,page_bef);
 		if(point_bef-point_cur==0)
 			WriteDat(1<<point_bef);
 		else if(point_bef-point_cur>0)
@@ -341,57 +373,14 @@ void draw_line(uint8_t x,uint8_t y_bef,uint8_t y_cur)
 
 	else
 	{
-		OLED_SetPos( page_cur,x);
+		OLED_SetPos( x,page_cur);
 		WriteDat(((1<<point_cur)-0x01)|(1<<point_cur));
 		while(page_cur!=page_bef+1){
 			page_cur--;
-			OLED_SetPos( page_cur,x);
+			OLED_SetPos( x,page_cur);
 			WriteDat(0xff);
 		}
-		OLED_SetPos( page_bef,x);
+		OLED_SetPos( x,page_bef);
 		WriteDat((0x80-(1<<point_bef))|0x80|(1<<point_bef));
 	}
-//	for(j=1;j<4;j++){
-//		for(i=0;i<8;i++)
-//		{
-//		OLED_SetPos(i, x+j) ;
-//			WriteDat(0x00);
-//		}
-//	}
 }
-/*
-*********************************************************************************************************
-*	函 数 名: OLED检测测试
-*	功能说明: 检测I2C总线设备，实际是对OLED_CheckDevice()的封装
-*	形    参：
-*	返 回 值: 返回值 0 表示没有检测到OLED，返回1表示检测到OLED
-*********************************************************************************************************
-*/
-
- uint8_t OLED_Test(void) 
-{
-	
-  if (OLED_CheckDevice(OLED_ADDRESS) == 1)
-	{
-		return 0;
-	}
-	else
-	{
-		return 1;
-	}
-}	
-
-/*写 缓存数据*/
-void Write_DataBuffer(void)//这个是将DataBuffer数组里面的值，全部写进屏里去
-{	
-	uint8_t i,j;
-	for(i=0;i<8;i++)
-	{
-		OLED_SetPos(i,0); //设置起始点坐标
-		for(j=0;j<128;j++)
-		{
-			WriteDat(DataBuffer[i][j]);//写数据
-		}
-	}
-}
-

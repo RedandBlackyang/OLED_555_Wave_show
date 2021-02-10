@@ -14,11 +14,10 @@
 #define accur 1/64	
 uint8_t key_status=1 ;
 uint8_t y1[128],y2[128];
-extern uint16_t ConvData[NPT];//ADC采样数据
+extern uint16_t ADC_Data[NPT];//ADC采样数据
 extern unsigned char BMP1[];
 int main()
 {
-	uint16_t x;
 	I2C_Configuration();
 	LED_Init();
 	OLED_Init();					 /* OLED初始化 */

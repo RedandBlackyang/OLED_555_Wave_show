@@ -5,7 +5,7 @@
 #include "bsp_advanced_timer.h"
 #include <string.h>
 #define accur 1/64
-uint16_t ConvData[NPT];
+uint16_t ADC_Data[NPT];
 extern uint8_t y1[128],y2[128];
 extern uint8_t key_status;
 static void ADCx_GPIO_Config(void)
@@ -77,7 +77,7 @@ static void ADCx_DMA_Config(void)
   RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
 
   DMA_InitStruct.DMA_PeripheralBaseAddr=(uint32_t)(&(ADC_x->DR));
-  DMA_InitStruct.DMA_MemoryBaseAddr=(uint32_t)(ConvData);
+  DMA_InitStruct.DMA_MemoryBaseAddr=(uint32_t)(ADC_Data);
   DMA_InitStruct.DMA_DIR=DMA_DIR_PeripheralSRC;
   DMA_InitStruct.DMA_BufferSize=NPT;
   DMA_InitStruct.DMA_PeripheralInc=DMA_PeripheralInc_Disable;
@@ -103,13 +103,13 @@ void ADCx_Init(void)
 }
 void DMA1_Channel1_IRQHandler(void)
 {
-	u16 x=0,i=0;
+	u16 x=0;
 	char str_Freq[10]={0};
   DMA_Cmd(DMA1_Channel1, DISABLE);
 
   DMA_ClearITPendingBit(DMA1_IT_TC1);
 	
-	FFT_Parameter_Return(ConvData);		//FFT计算实际频率
+	FFT_Parameter_Return(ADC_Data);		//FFT计算实际频率
 	OLED_CLS();
 	
 	sprintf(str_Freq,"%.1f Hz",Freq);
@@ -117,7 +117,7 @@ void DMA1_Channel1_IRQHandler(void)
 	
 	for(x=0;x<128;x++)								
 	{
-		y1[x]=ConvData[x]*accur;
+		y1[x]=ADC_Data[x]*accur;
 	}
 	for(x=1;x<128;x++)							//画波形
 	{

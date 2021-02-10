@@ -343,7 +343,7 @@ void OLED_DrawBMP(unsigned char x0,unsigned char y0,unsigned char x1,unsigned ch
 }
 void draw_line(uint8_t x,uint8_t y_bef,uint8_t y_cur)
 {
-	uint8_t page_bef,page_cur,point_bef,point_cur,i,j;
+	uint8_t page_bef,page_cur,point_bef,point_cur;
 	page_bef=7-y_bef/8;//7
 	page_cur=7-y_cur/8;//0
 	point_bef =7-y_bef%8;//7
@@ -384,3 +384,4 @@ void draw_line(uint8_t x,uint8_t y_bef,uint8_t y_cur)
 		WriteDat((0x80-(1<<point_bef))|0x80|(1<<point_bef));
 	}
 }
+

@@ -25,8 +25,10 @@ int main()
 	USARTx_Init();
 	AdvancedTim_Init();
 	ADCx_Init();
+	printf("hello world");
 	OLED_CLS();
 	TIM_Cmd(ADVANCED_TIM, ENABLE);
+
 	while(1)
 	{
 

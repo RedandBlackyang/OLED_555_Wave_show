@@ -101,29 +101,60 @@ void ADCx_Init(void)
 	ADCx_Config();
 	
 }
+
+//stm32为小端格式,数据高字节储存在大地址,低字节储存在小地址
+void TX_ADCdata(uint16_t adc_data)
+{
+	uint8_t i,str[2];
+	str[0]=adc_data>>8;		//发送大端
+	str[1]=adc_data;
+	for(i=0;i<2;i++)
+	{			   
+		while((USART1->SR&0X40)==0);   /* 循环发送,直到发送完毕 */
+		USART1->DR = str[i];  
+	}		
+
+}
+
+
 void DMA1_Channel1_IRQHandler(void)
 {
 	u16 x=0;
+	
 	char str_Freq[10]={0};
   DMA_Cmd(DMA1_Channel1, DISABLE);
 
   DMA_ClearITPendingBit(DMA1_IT_TC1);
 	
-	FFT_Parameter_Return(ADC_Data);		//FFT计算实际频率
+//	FFT_Parameter_Return(ADC_Data);		//FFT计算实际频率
 	OLED_CLS();
 	
-	sprintf(str_Freq,"%.1f Hz",Freq);
-	OLED_ShowStr(0,0,(unsigned char *)str_Freq,1);
+//	sprintf(str_Freq,"%.1f Hz",Freq);
+//	OLED_ShowStr(0,0,(unsigned char *)str_Freq,1);
 	
 	for(x=0;x<128;x++)								
 	{
 		y1[x]=ADC_Data[x]*accur;
-	}
-	for(x=1;x<128;x++)							//画波形
-	{
-		draw_vertical_line(x,y1[x-1],y1[x]);
+		TX_ADCdata(ADC_Data[x]);
 	}
 	
+	
+	
+	
+
+//	for(x=1;x<128;x++)							//画波形
+//	{
+//		draw_vertical_line(x,y1[x-1],y1[x]);
+//	}
+	
+
+
+//	for(x=1;x<128;x++)							//画波形
+//	{
+//		DrawLine(x-1,63-y1[x-1],x,63-y1[x]);
+//	}	
+//	UpdateScreenBuffer();
+//	ClearScreenBuffer(0);
 	Delay_ms(150);
 	DMA_Cmd(DMA1_Channel1, ENABLE);
 }

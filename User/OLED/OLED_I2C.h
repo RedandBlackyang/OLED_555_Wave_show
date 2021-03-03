@@ -38,8 +38,16 @@ void OLED_CLS(void);
 void OLED_ON(void);
 void OLED_OFF(void);
 void OLED_ShowStr(unsigned char x, unsigned char y, unsigned char ch[], unsigned char TextSize);
-void OLED_ShowCN(unsigned char x, unsigned char y, unsigned char N);
+
 void OLED_DrawBMP(unsigned char x0,unsigned char y0,unsigned char x1,unsigned char y1,unsigned char BMP[]);
 // 画竖直的线,在横坐标为x处,画由y_bef到y_cur的直线
 void draw_vertical_line(uint8_t x,uint8_t y_bef,uint8_t y_cur);
+
+void DrawLine(int x1,int y1,int x2,int y2);
+void DrawCircle ( int usX_Center, int usY_Center, int usRadius);
+void DrawRect1(int left,int top,int right,int bottom);
+void UpdateScreenBuffer(void);
+void ClearScreenBuffer(unsigned char val);
+void OlED_Fill_Buffer(uint8_t BMP[]);
+
 #endif

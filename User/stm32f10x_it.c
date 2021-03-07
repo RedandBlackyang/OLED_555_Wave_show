@@ -146,6 +146,8 @@ void KEY1_IRQHandler(void)
 
 		if(key_status==0)
 				key_status=1;
+		else if(key_status==1)
+				key_status=2;
 		else 
 				key_status=0;
     //清除中断标志位
@@ -160,6 +162,8 @@ void KEY2_IRQHandler(void)
 	{
 		if(key_status==0)
 				key_status=1;
+		else if(key_status==1)
+				key_status=2;
 		else 
 				key_status=0;
     //清除中断标志位

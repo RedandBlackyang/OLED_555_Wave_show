@@ -145,7 +145,7 @@ void DMA1_Channel1_IRQHandler(void)
 
 void Oled_Message_Show(void)
 {
-	uint16_t  x=0,x_max=0,x_min=0,i_max=0;
+	uint16_t  x=0,x_min=0;
 	uint8_t   flag1=0,flag2=0;			//flag1保证之前电平为高，flag2保证低电平到高点平
 	char str_show[20]={0};
 	
@@ -166,7 +166,7 @@ void Oled_Message_Show(void)
 		}
 	
 	}
-	else if(key_status==1)
+	else
 	{
 		wave_average=0;
 		wave_Vrms=0;
@@ -214,6 +214,8 @@ void Oled_Message_Show(void)
 				break;
 		}
 		
+		wave_Vpp=wave_max_V-wave_min_V;				//计算峰峰值
+		
 		FFT_Parameter_Return(ADC_Data);				//FFT计算实际频率		
 		
 		wave_cycle=1/Freq*1000000;					//周期 单位us
@@ -224,32 +226,52 @@ void Oled_Message_Show(void)
 		
 		wave_Vrms=sqrt(wave_Vrms);					//方均根值计算有效值
 		
+		wave_t1=wave_tw;							//正周期
 
+		wave_t2=wave_cycle-wave_tw;					//负周期
 		
-		sprintf(str_show,"F=%.1f Hz",Freq);					//频率
-		OLED_ShowStr(0,0,(unsigned char *)str_show,1);
+		if(key_status==1){
+		
+			sprintf(str_show,"F=%.1f Hz",Freq);					//频率
+			OLED_ShowStr(0,0,(unsigned char *)str_show,1);
 
-		sprintf(str_show,"T=%.1f us",wave_cycle);			//周期
-		OLED_ShowStr(0,1,(unsigned char *)str_show,1);
-											
-		sprintf(str_show,"Vrms=%.3f V",wave_Vrms);			//有效值
-		OLED_ShowStr(0,2,(unsigned char *)str_show,1);
+			sprintf(str_show,"T=%.1f us",wave_cycle);			//周期
+			OLED_ShowStr(0,1,(unsigned char *)str_show,1);
+												
+			sprintf(str_show,"Vrms=%.3f V",wave_Vrms);			//有效值
+			OLED_ShowStr(0,2,(unsigned char *)str_show,1);
+				
+			sprintf(str_show,"V_average=%.3f V",wave_average);	//平均值
+			OLED_ShowStr(0,3,(unsigned char *)str_show,1);
 			
-		sprintf(str_show,"V_average=%.3f V",wave_average);	//平均值
-		OLED_ShowStr(0,3,(unsigned char *)str_show,1);
+			sprintf(str_show,"V_Max=%.3f V",wave_max_V);		//最大值
+			OLED_ShowStr(0,4,(unsigned char *)str_show,1);
+			
+			sprintf(str_show,"V_Min=%.3f V",wave_min_V);		//最小值
+			OLED_ShowStr(0,5,(unsigned char *)str_show,1);
+			
+			sprintf(str_show,"Vpp=%.3f",wave_Vpp);				//峰峰值
+			OLED_ShowStr(0,6,(unsigned char *)str_show,1);	
 		
-		sprintf(str_show,"V_Max=%.3f V",wave_max_V);		//最大值
-		OLED_ShowStr(0,4,(unsigned char *)str_show,1);
-		
-		sprintf(str_show,"V_Min=%.3f V",wave_min_V);		//最小值
-		OLED_ShowStr(0,5,(unsigned char *)str_show,1);
-		
-		sprintf(str_show,"tw=%.3f us",wave_tw);				//脉冲宽度
-		OLED_ShowStr(0,6,(unsigned char *)str_show,1);
-		
-		sprintf(str_show,"q=%.3f",wave_q);				//占空比
-		OLED_ShowStr(0,7,(unsigned char *)str_show,1);
+		}
+		else
+		{
+			sprintf(str_show,"tw=%.3f us",wave_tw);				//脉冲宽度
+			OLED_ShowStr(0,0,(unsigned char *)str_show,1);
+			
+			sprintf(str_show,"q=%.3f",wave_q);					//占空比
+			OLED_ShowStr(0,1,(unsigned char *)str_show,1);
+			
+			sprintf(str_show,"t1=%.3f",wave_t1);				//正周期
+			OLED_ShowStr(0,2,(unsigned char *)str_show,1);
+
+			sprintf(str_show,"t2=%.3f",wave_t2);				//负周期
+			OLED_ShowStr(0,3,(unsigned char *)str_show,1);	
+
+			
+		}
 	}
+
 	
 	Delay_ms(150);
 	

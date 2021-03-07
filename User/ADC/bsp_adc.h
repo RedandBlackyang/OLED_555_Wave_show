@@ -21,6 +21,10 @@
 #define ADCx_DMA_CHx 		  	DMA1_Channel1
 
 
+#define VREF3_3		1			//ADCµÄ±ê³ÆÖµ
+
+
 void ADCx_Init(void);
 
+void Oled_Message_Show(void);
 #endif //_BSP_ADC_H_

@@ -4,10 +4,23 @@
 #include "fft_calculate.h"
 #include "bsp_advanced_timer.h"
 #include <stdio.h>
+#include <math.h>
 #define accur 1/64
-uint16_t ADC_Data[NPT];
+uint16_t ADC_Data[NPT]={0};
+float  wave_value_V[128]={0};		//电压值
+float  wave_cycle;					//周期
+float  wave_t1;						//正半周
+float  wave_t2;						//负半周
+float  wave_tw;						//脉冲宽度
+float  wave_q;						//占空比
+float  wave_max_V;					//最大值
+float  wave_min_V;					//最小值
+float  wave_Vpp;					//峰峰值
+float  wave_average=0;				//平均值
+float  wave_Vrms;					//有效值
 extern uint8_t y1[128],y2[128];
 extern uint8_t key_status;
+
 static void ADCx_GPIO_Config(void)
 {
 	GPIO_InitTypeDef GPIO_InitStruct;
@@ -119,43 +132,125 @@ void TX_ADCdata(uint16_t adc_data)
 
 void DMA1_Channel1_IRQHandler(void)
 {
-	u16 x=0;
-	
-	char str_Freq[10]={0};
-  DMA_Cmd(DMA1_Channel1, DISABLE);
 
-  DMA_ClearITPendingBit(DMA1_IT_TC1);
-	
-//	FFT_Parameter_Return(ADC_Data);		//FFT计算实际频率
-	OLED_CLS();
-	
-//	sprintf(str_Freq,"%.1f Hz",Freq);
-//	OLED_ShowStr(0,0,(unsigned char *)str_Freq,1);
-	
-	for(x=0;x<128;x++)								
-	{
-		y1[x]=ADC_Data[x]*accur;
-		TX_ADCdata(ADC_Data[x]);
-	}
-	
-	
-	
-	
+	DMA_Cmd(DMA1_Channel1, DISABLE);
 
-//	for(x=1;x<128;x++)							//画波形
-//	{
-//		draw_vertical_line(x,y1[x-1],y1[x]);
-//	}
+	DMA_ClearITPendingBit(DMA1_IT_TC1);
 	
-
-
-//	for(x=1;x<128;x++)							//画波形
-//	{
-//		DrawLine(x-1,63-y1[x-1],x,63-y1[x]);
-//	}	
-//	UpdateScreenBuffer();
-//	ClearScreenBuffer(0);
-	Delay_ms(150);
+	Oled_Message_Show();
+	
 	DMA_Cmd(DMA1_Channel1, ENABLE);
 }
 
+
+void Oled_Message_Show(void)
+{
+	uint16_t  x=0,x_max=0,x_min=0,i_max=0;
+	uint8_t   flag1=0,flag2=0;			//flag1保证之前电平为高，flag2保证低电平到高点平
+	char str_show[20]={0};
+	
+	OLED_CLS();
+	
+	if(key_status==0)
+	{
+		
+		for(x=0;x<128;x++)								
+		{
+			y1[x]=ADC_Data[x]*accur;
+			TX_ADCdata(ADC_Data[x]);				//向串口示波器发送数据
+		}
+		
+		for(x=1;x<128;x++)							//画波形
+		{	
+			draw_vertical_line(x,y1[x-1],y1[x]);
+		}
+	
+	}
+	else if(key_status==1)
+	{
+		wave_average=0;
+		wave_Vrms=0;
+		wave_max_V=wave_value_V[0];
+		wave_min_V=wave_value_V[0];
+		for(x=0;x<128;x++)								
+		{
+			#if 		VREF3_3						//如果ADC参考值为3.3V
+			wave_value_V[x]=ADC_Data[x]*3.3/4096;
+			
+			#else									//如果ADC参考值为5V
+			wave_value_V[x]=ADC_Data[x]*5/4096;
+			#endif
+			
+			wave_average+=wave_value_V[x]/128;		
+			
+			wave_Vrms+=wave_value_V[x]*wave_value_V[x]/128;
+			
+			if(wave_value_V[x]>wave_max_V)
+			{
+				wave_max_V=wave_value_V[x];
+			}
+			
+			if(wave_value_V[x]<wave_min_V)
+			{
+				wave_min_V=wave_value_V[x];
+			}
+			
+			
+		}
+
+			
+		for(x=0;x<128;x++)
+		{
+			if(fabs(wave_value_V[x]-wave_min_V)<0.01)
+				flag1=1;			//保证计算脉冲宽度之前为低电平
+			
+			if(((wave_value_V[x]-(wave_min_V+wave_max_V)/2)>0)&&(flag1==1))
+			{
+				x_min++;
+				flag2=1;
+			}
+			
+			if((fabs(wave_value_V[x]-wave_min_V)<0.01)&&(flag1==1)&&(flag2==1))
+				break;
+		}
+		
+		FFT_Parameter_Return(ADC_Data);				//FFT计算实际频率		
+		
+		wave_cycle=1/Freq*1000000;					//周期 单位us
+		
+		wave_tw=x_min*1000000/Fs;					//脉冲周期 单位us
+		
+		wave_q=wave_tw/wave_cycle;					//占空比
+		
+		wave_Vrms=sqrt(wave_Vrms);					//方均根值计算有效值
+		
+
+		
+		sprintf(str_show,"F=%.1f Hz",Freq);					//频率
+		OLED_ShowStr(0,0,(unsigned char *)str_show,1);
+
+		sprintf(str_show,"T=%.1f us",wave_cycle);			//周期
+		OLED_ShowStr(0,1,(unsigned char *)str_show,1);
+											
+		sprintf(str_show,"Vrms=%.3f V",wave_Vrms);			//有效值
+		OLED_ShowStr(0,2,(unsigned char *)str_show,1);
+			
+		sprintf(str_show,"V_average=%.3f V",wave_average);	//平均值
+		OLED_ShowStr(0,3,(unsigned char *)str_show,1);
+		
+		sprintf(str_show,"V_Max=%.3f V",wave_max_V);		//最大值
+		OLED_ShowStr(0,4,(unsigned char *)str_show,1);
+		
+		sprintf(str_show,"V_Min=%.3f V",wave_min_V);		//最小值
+		OLED_ShowStr(0,5,(unsigned char *)str_show,1);
+		
+		sprintf(str_show,"tw=%.3f us",wave_tw);				//脉冲宽度
+		OLED_ShowStr(0,6,(unsigned char *)str_show,1);
+		
+		sprintf(str_show,"q=%.3f",wave_q);				//占空比
+		OLED_ShowStr(0,7,(unsigned char *)str_show,1);
+	}
+	
+	Delay_ms(150);
+	
+}

@@ -1,4 +1,8 @@
 #include "bsp_advanced_timer.h"
+uint16_t  	ADVANCED_TIM_PSC 	=		24-1;	
+uint16_t 	ADVANCED_TIM_ARR 	=		1000-1;
+uint16_t 	ADVANCED_TIM_CCR	=		400;
+
 
 static void AdvancedTim_GPIO_Config(void)
 {

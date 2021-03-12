@@ -8,7 +8,8 @@ float  Vpp=0;				//实际电压幅值
 float	Freq=0;				//实际频率
 /******************************************************************
 函数名称:GetPowerMag()
-函数功能:计算各次谐波  幅值
+函数功能:计
+算各次谐波  幅值
 
 备　　注:	高16位存储实部，低16位存储虚部。
 					先将lBufOutArray分解成实部(X)和虚部(Y)，然后计算幅值sqrt(X*X+Y*Y)
@@ -42,6 +43,7 @@ static void GetPowerMag()
 *******************************************************************/
 void FFT_Parameter_Return(uint16_t  *buffer_in)
 {
+
 	uint16_t i=0,i_max=0;
 	long v_max=0;
 	//将adc采样数据转换为复数,因为cr4_fft_256_stm32输入为32位数据且高16位存储实部，低16位存储虚部。
@@ -58,8 +60,7 @@ void FFT_Parameter_Return(uint16_t  *buffer_in)
 			i_max=i;
 		}
 	}
-	//实际电压为最大幅值/(数据个数)
-//	Vpp=(float)v_max/NPT;
+	printf("%d",i_max);
 	//FFT之后最大幅值对应的横坐标*频率分辨率=实际频率
-	Freq=(float)Freq_res*i_max;			
+	Freq=Freq_res*i_max;	
 }

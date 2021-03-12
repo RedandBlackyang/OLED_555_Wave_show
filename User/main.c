@@ -10,14 +10,18 @@
 #include "table_fft.h"
 #include	"stm32_dsp.h"
 #include "fft_calculate.h"
+#include "bsp_pwm.h" 
 #define pi 3.1415926535
 #define accur 1/64	
 uint8_t key_status=0;
+//uint8_t key_Fs_status=0;	
+uint8_t key_Fs_WhetherChange_status=0;
 uint8_t y1[128]={0},y2[128]={0};
 extern uint16_t ADC_Data[NPT];//ADC采样数据
 extern unsigned char BMP1[];
 int main()
 {
+	Motor_Init();
 	I2C_Configuration();
 	LED_Init();
 	OLED_Init();					 /* OLED初始化 */

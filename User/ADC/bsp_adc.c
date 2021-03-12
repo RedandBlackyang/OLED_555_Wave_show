@@ -7,6 +7,7 @@
 #include <math.h>
 #define accur 1/64
 uint16_t ADC_Data[NPT]={0};
+
 float  wave_value_V[128]={0};		//电压值
 float  wave_cycle;					//周期
 float  wave_t1;						//正半周
@@ -20,21 +21,23 @@ float  wave_average=0;				//平均值
 float  wave_Vrms;					//有效值
 extern uint8_t y1[128],y2[128];
 extern uint8_t key_status;
+//extern uint8_t key_Fs_status;
+extern uint8_t key_Fs_WhetherChange_status;
 
 static void ADCx_GPIO_Config(void)
 {
 	GPIO_InitTypeDef GPIO_InitStruct;
 	/*开时钟*/
 	RCC_APB2PeriphClockCmd(ADCx_PORT_CLK_1, ENABLE);
-	RCC_APB2PeriphClockCmd(ADCx_PORT_CLK_2, ENABLE);
+//	RCC_APB2PeriphClockCmd(ADCx_PORT_CLK_2, ENABLE);
 	/*配置参数*/
 	GPIO_InitStruct.GPIO_Pin=ADCx_PIN_1;
 	GPIO_InitStruct.GPIO_Mode=GPIO_Mode_AIN;/*模拟输入模式*/
 	/*写入寄存器*/
 	GPIO_Init(ADCx_PORT_1, &GPIO_InitStruct);
 	
-	GPIO_InitStruct.GPIO_Pin=ADCx_PIN_2;
-	GPIO_Init(ADCx_PORT_2, &GPIO_InitStruct);
+//	GPIO_InitStruct.GPIO_Pin=ADCx_PIN_2;
+//	GPIO_Init(ADCx_PORT_2, &GPIO_InitStruct);
 
 }
 
@@ -55,7 +58,7 @@ static void ADCx_Config(void)
 
 	RCC_ADCCLKConfig(RCC_PCLK2_Div8);
 
-	ADC_RegularChannelConfig(ADC_x, ADCx_CHx_1, 1, ADC_SampleTime_239Cycles5);
+	ADC_RegularChannelConfig(ADC_x, ADCx_CHx_1, 1, ADC_SampleTime_55Cycles5);
 //	ADC_RegularChannelConfig(ADC_x, ADCx_CHx_2, 2, ADC_SampleTime_239Cycles5);
 
 	ADC_Cmd(ADC_x, ENABLE);
@@ -137,6 +140,8 @@ void DMA1_Channel1_IRQHandler(void)
 
 	DMA_ClearITPendingBit(DMA1_IT_TC1);
 	
+//	FFT_Parameter_Return(ADC_Data);
+	
 	Oled_Message_Show();
 	
 	DMA_Cmd(DMA1_Channel1, ENABLE);
@@ -150,7 +155,7 @@ void Oled_Message_Show(void)
 	char str_show[20]={0};
 	
 	OLED_CLS();
-	
+	ADC_Fs_Select();
 	if(key_status==0)
 	{
 		
@@ -220,7 +225,7 @@ void Oled_Message_Show(void)
 		
 		wave_cycle=1/Freq*1000000;					//周期 单位us
 		
-		wave_tw=x_min*1000000/Fs;					//脉冲周期 单位us
+		wave_tw=x_min*1000000/(float)Fs;					//脉冲周期 单位us
 		
 		wave_q=wave_tw/wave_cycle;					//占空比
 		
@@ -230,28 +235,31 @@ void Oled_Message_Show(void)
 
 		wave_t2=wave_cycle-wave_tw;					//负周期
 		
-		if(key_status==1){
+		if(key_status==1)
+		{
+			
+			sprintf(str_show,"Fs=%d Hz",Fs);					//采样频率
+			OLED_ShowStr(0,0,(unsigned char *)str_show,1);
 		
 			sprintf(str_show,"F=%.1f Hz",Freq);					//频率
-			OLED_ShowStr(0,0,(unsigned char *)str_show,1);
+			OLED_ShowStr(0,1,(unsigned char *)str_show,1);
 
 			sprintf(str_show,"T=%.1f us",wave_cycle);			//周期
-			OLED_ShowStr(0,1,(unsigned char *)str_show,1);
+			OLED_ShowStr(0,2,(unsigned char *)str_show,1);
 												
 			sprintf(str_show,"Vrms=%.3f V",wave_Vrms);			//有效值
-			OLED_ShowStr(0,2,(unsigned char *)str_show,1);
+			OLED_ShowStr(0,3,(unsigned char *)str_show,1);
 				
 			sprintf(str_show,"V_average=%.3f V",wave_average);	//平均值
-			OLED_ShowStr(0,3,(unsigned char *)str_show,1);
-			
-			sprintf(str_show,"V_Max=%.3f V",wave_max_V);		//最大值
 			OLED_ShowStr(0,4,(unsigned char *)str_show,1);
 			
-			sprintf(str_show,"V_Min=%.3f V",wave_min_V);		//最小值
+			sprintf(str_show,"V_Max=%.3f V",wave_max_V);		//最大值
 			OLED_ShowStr(0,5,(unsigned char *)str_show,1);
 			
-			sprintf(str_show,"Vpp=%.3f",wave_Vpp);				//峰峰值
-			OLED_ShowStr(0,6,(unsigned char *)str_show,1);	
+			sprintf(str_show,"V_Min=%.3f V",wave_min_V);		//最小值
+			OLED_ShowStr(0,6,(unsigned char *)str_show,1);
+			
+
 		
 		}
 		else
@@ -267,12 +275,67 @@ void Oled_Message_Show(void)
 
 			sprintf(str_show,"t2=%.3f",wave_t2);				//负周期
 			OLED_ShowStr(0,3,(unsigned char *)str_show,1);	
+			
+			sprintf(str_show,"Vpp=%.3f",wave_Vpp);				//峰峰值
+			OLED_ShowStr(0,4,(unsigned char *)str_show,1);	
 
 			
 		}
 	}
 
 	
-	Delay_ms(150);
+	Delay_ms(100);
 	
 }
+
+
+
+static void ADC_Fs_Change(uint16_t PSC,uint16_t ARR)
+{
+
+	TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStruct;
+
+	TIM_Cmd(ADVANCED_TIM, DISABLE);	
+
+	TIM_TimeBaseInitStruct.TIM_Prescaler=PSC;
+	TIM_TimeBaseInitStruct.TIM_CounterMode=TIM_CounterMode_Up;
+	TIM_TimeBaseInitStruct.TIM_Period=ARR;
+	TIM_TimeBaseInitStruct.TIM_ClockDivision=TIM_CKD_DIV1;
+	TIM_TimeBaseInitStruct.TIM_RepetitionCounter=0;
+
+	TIM_TimeBaseInit(ADVANCED_TIM, &TIM_TimeBaseInitStruct);
+	
+
+//	TIM_CtrlPWMOutputs(ADVANCED_TIM, ENABLE);
+	
+	
+	TIM_Cmd(ADVANCED_TIM, ENABLE);	
+}
+
+
+void ADC_Fs_Select(void)
+{
+	
+	if(key_Fs_WhetherChange_status==1)
+	{
+		static uint8_t  key_Fs_status=0;
+		switch(key_Fs_status%9)
+		{
+			case 0: ADVANCED_TIM_PSC=72-1,ADVANCED_TIM_ARR=1000-1;ADC_Fs_Change(ADVANCED_TIM_PSC,ADVANCED_TIM_ARR);	break;		//1k
+			case 1: ADVANCED_TIM_PSC=24-1,ADVANCED_TIM_ARR=1000-1;ADC_Fs_Change(ADVANCED_TIM_PSC,ADVANCED_TIM_ARR);	break;		//3k
+			case 2: ADVANCED_TIM_PSC=12-1,ADVANCED_TIM_ARR=1000-1;ADC_Fs_Change(ADVANCED_TIM_PSC,ADVANCED_TIM_ARR);	break;		//6k
+			case 3: ADVANCED_TIM_PSC=8-1,ADVANCED_TIM_ARR=1000-1;ADC_Fs_Change(ADVANCED_TIM_PSC,ADVANCED_TIM_ARR);	break;		//9k
+			case 4: ADVANCED_TIM_PSC=6-1,ADVANCED_TIM_ARR=1000-1;ADC_Fs_Change(ADVANCED_TIM_PSC,ADVANCED_TIM_ARR);	break;		//12k
+			case 5: ADVANCED_TIM_PSC=6-1,ADVANCED_TIM_ARR=800-1;ADC_Fs_Change(ADVANCED_TIM_PSC,ADVANCED_TIM_ARR);	break;		//15k
+			case 6: ADVANCED_TIM_PSC=4-1,ADVANCED_TIM_ARR=1000-1;ADC_Fs_Change(ADVANCED_TIM_PSC,ADVANCED_TIM_ARR);	break;		//18k
+			case 7: ADVANCED_TIM_PSC=3-1,ADVANCED_TIM_ARR=1000-1;ADC_Fs_Change(ADVANCED_TIM_PSC,ADVANCED_TIM_ARR);	break;		//24k
+			case 8: ADVANCED_TIM_PSC=3-1,ADVANCED_TIM_ARR=800-1;ADC_Fs_Change(ADVANCED_TIM_PSC,ADVANCED_TIM_ARR);	break;		//30k
+
+			default:ADVANCED_TIM_PSC=3-1,ADVANCED_TIM_ARR=1000-1;ADC_Fs_Change(ADVANCED_TIM_PSC,ADVANCED_TIM_ARR);	break;		//24k											//24k
+		
+		}
+		key_Fs_status++;
+		key_Fs_WhetherChange_status=0;
+	}
+}
+

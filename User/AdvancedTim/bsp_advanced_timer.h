@@ -11,10 +11,7 @@
 #define ADVANCED_TIM 							TIM1
 #define ADVANCED_TIM_CLK					RCC_APB2Periph_TIM1
 	
-#define ADVANCED_TIM_PSC 					3-1
-	
-#define ADVANCED_TIM_ARR 					1000-1
-#define ADVANCED_TIM_CCR					100
+
 void AdvancedTim_Init(void);
 
 #endif//_BSP_ADVANCED_TIMER_H_

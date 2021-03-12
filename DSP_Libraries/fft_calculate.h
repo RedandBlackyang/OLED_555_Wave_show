@@ -7,7 +7,14 @@
 
 #define NPT 1024				//采样数据个数
 #define Fs	(72000000/((ADVANCED_TIM_PSC+1)*(ADVANCED_TIM_ARR+1)))	//采样频率
-#define	Freq_res	Fs/NPT																					//频率分辨率
+#define	Freq_res	((float)Fs/NPT)																					//频率分辨率
+
+
+extern uint16_t  	ADVANCED_TIM_PSC ;	
+extern uint16_t 	ADVANCED_TIM_ARR ;
+extern uint16_t 	ADVANCED_TIM_CCR ;
+
+
 extern long InBufArray[NPT];
 extern long OutBufArray[NPT/2];
 extern long MagBufArray[NPT/2];

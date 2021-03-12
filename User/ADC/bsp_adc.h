@@ -27,4 +27,5 @@
 void ADCx_Init(void);
 
 void Oled_Message_Show(void);
+void ADC_Fs_Select(void);
 #endif //_BSP_ADC_H_

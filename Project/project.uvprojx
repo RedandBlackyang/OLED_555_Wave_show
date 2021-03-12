@@ -339,7 +339,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F10X_HD,USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>..\User;..\Libraries\CMSIS;..\User\LED;..\User\SysTick;..\User\USART;..\User\OLED;..\User\i2c;..\User\ADC;..\User\AdvancedTim;..\User\Key;..\Libraries\FWlib\inc;..\DSP_Libraries</IncludePath>
+              <IncludePath>..\User;..\Libraries\CMSIS;..\User\LED;..\User\SysTick;..\User\USART;..\User\OLED;..\User\i2c;..\User\ADC;..\User\AdvancedTim;..\User\Key;..\Libraries\FWlib\inc;..\DSP_Libraries;..\User\pwm</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -612,6 +612,11 @@
               <FileName>bsp_key.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\User\Key\bsp_key.c</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_pwm.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\User\pwm\bsp_pwm.c</FilePath>
             </File>
           </Files>
         </Group>

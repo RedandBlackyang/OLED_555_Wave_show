@@ -11,7 +11,7 @@
 /*I2C½Ó¿Ú*/
 #define OLED_I2C                          I2C1
 #define OLED_I2C_CLK                      RCC_APB1Periph_I2C1
-#define OLED_I2C_CLK_INIT								  RCC_APB1PeriphClockCmd
+#define OLED_I2C_CLK_INIT				  RCC_APB1PeriphClockCmd
 
 #define OLED_I2C_SCL_PIN                  GPIO_Pin_6                 
 #define OLED_I2C_SCL_GPIO_PORT            GPIOB                       

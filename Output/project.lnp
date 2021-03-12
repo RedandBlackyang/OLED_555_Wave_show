@@ -37,6 +37,7 @@
 "..\output\bsp_adc.o"
 "..\output\bsp_advanced_timer.o"
 "..\output\bsp_key.o"
+"..\output\bsp_pwm.o"
 --library_type=microlib --strict --scatter "..\Output\project.sct"
 --summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
 --info sizes --info totals --info unused --info veneers

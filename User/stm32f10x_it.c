@@ -27,6 +27,8 @@
 #include "bsp_key.h"
 
 extern uint8_t  key_status;
+//extern uint8_t  key_Fs_status;
+extern uint8_t key_Fs_WhetherChange_status;
 /** @addtogroup STM32F10x_StdPeriph_Template
   * @{
   */
@@ -160,12 +162,10 @@ void KEY2_IRQHandler(void)
   //确保是否产生了EXTI Line中断
 	if(EXTI_GetITStatus(KEY2_INT_EXTI_LINE) != RESET) 
 	{
-		if(key_status==0)
-				key_status=1;
-		else if(key_status==1)
-				key_status=2;
-		else 
-				key_status=0;
+//		key_Fs_status++;		//用于切换采样频率
+		
+		key_Fs_WhetherChange_status=1;
+		
     //清除中断标志位
 		EXTI_ClearITPendingBit(KEY2_INT_EXTI_LINE);     
 	}
